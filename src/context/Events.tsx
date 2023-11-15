@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import { Events, EventsContext, EventsProviderProps, unionOmit } from "./types";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 export const Context = React.createContext<EventsContext | null>(null);
 
 // context provider
 export function EventsProvider({ children }: EventsProviderProps) {
-  const [events, setEvents] = useState<Events[]>([]);
+  const [events, setEvents] = useLocalStorage("EVENTS", []);
 
   function addEvent(eventDetails: unionOmit<Events, "id">) {
     setEvents((e) => [...e, { ...eventDetails, id: crypto.randomUUID() }]);
