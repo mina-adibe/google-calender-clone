@@ -1,10 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ModalProps } from "./types";
+import { cc } from "../utils/cc";
 
 const Modal = ({ children, isOpen, onClose }: ModalProps) => {
-  // make a useeffect to close the modal when the user clicks outside of the modal
+  const [isClosing, setIsClosing] = useState(false);
+  const prevIsOpen = useRef<boolean>();
 
+  // TODO:REVISITE THIS
+  // Getting the previous props or state via useRef
+  useLayoutEffect(() => {
+    if (!isOpen && prevIsOpen.current) {
+      setIsClosing(true);
+    }
+    prevIsOpen.current = isOpen;
+  }, [isOpen]);
+
+  // make a useeffect to close the modal when the user clicks outside of the modal
   useEffect(() => {
     function handleEscape(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -25,14 +37,14 @@ const Modal = ({ children, isOpen, onClose }: ModalProps) => {
     return () => document.removeEventListener("click", handleClick);
   }, [onClose]);
 
-  if (!isOpen) {
+  if (!isOpen && !isClosing) {
     return null;
   }
 
   // another solution : document.querySelector("#modal-container")!
-
+  //onAnimationEnd to  remove "closing" class from modal
   return createPortal(
-    <div className="modal" style={{ display: isOpen ? "block" : "none" }}>
+    <div onAnimationEnd={() => setIsClosing(false)} className={cc("modal", isClosing && "closing")}>
       <div className="overlay" onClick={onClose} />
       <div className="modal-body">{children}</div>
     </div>,
