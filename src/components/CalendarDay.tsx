@@ -7,6 +7,8 @@ import { useEvents } from "../context/useEvents";
 import { Events } from "../context/types";
 
 import CalendarEvent from "./CalendarEvent";
+import OverflowContainer from "./OverflowContainer";
+import ViewMoreCalendarEventsModal from "./ViewMoreCalendarEventsModal";
 
 type CalendarDayProps = {
   day: Date;
@@ -18,6 +20,7 @@ type CalendarDayProps = {
 const CalendarDay = ({ day, showWeekName, selectedMonth, events }: CalendarDayProps) => {
   // state for modal
   const [isNewEventModalOpen, setIsNewEventModalOpen] = React.useState(false);
+  const [isViewMoreEventModalOpen, setisViewMoreEventModalOpen] = React.useState(false);
 
   const { addEvent } = useEvents();
 
@@ -58,11 +61,26 @@ const CalendarDay = ({ day, showWeekName, selectedMonth, events }: CalendarDayPr
         </button>
       </div>
       {sortedEvents.length > 0 && (
-        <div className="events">
-          {sortedEvents.map((event) => {
-            return <CalendarEvent key={event.id} event={event} />;
-          })}
-        </div>
+        <OverflowContainer
+          className="events"
+          getKey={(event) => event.id}
+          items={sortedEvents}
+          renderItem={(event) => <CalendarEvent event={event} />}
+          renderOverflow={(amount) => (
+            <>
+              <button
+                onClick={() => setisViewMoreEventModalOpen(true)}
+                className="events-view-more-btn">
+                + {amount} More{" "}
+              </button>
+              <ViewMoreCalendarEventsModal
+                events={sortedEvents}
+                isOpen={isViewMoreEventModalOpen}
+                onClose={() => setisViewMoreEventModalOpen(false)}
+              />
+            </>
+          )}
+        />
       )}
 
       <EventFormModal
